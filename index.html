@@ -22,7 +22,7 @@
       top: 50%;
       transform: translateY(-50%);
       width: 320px;
-      background: rgba(20, 20, 20, 0.9);
+      background: rgba(20, 20, 20, 0.95);
       border-radius: 14px;
       box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
       padding: 20px;
@@ -33,6 +33,8 @@
       color: #fff;
       margin-bottom: 16px;
       letter-spacing: 1px;
+      text-transform: uppercase;
+      font-weight: 600;
     }
     .menu-item {
       background: rgba(40, 40, 40, 0.9);
@@ -42,12 +44,13 @@
       border-radius: 8px;
       transition: all 0.15s ease;
       font-size: 16px;
+      cursor: default;
     }
     .menu-item.selected {
       background: linear-gradient(90deg, #00aaff, #0055ff);
       color: #fff;
       transform: scale(1.04);
-      box-shadow: 0 0 10px rgba(0, 170, 255, 0.5);
+      box-shadow: 0 0 12px rgba(0, 170, 255, 0.7);
     }
     .menu-item:hover {
       background: rgba(60, 60, 60, 0.9);
@@ -69,7 +72,7 @@
     <div class="menu-item" data-id="teleport">Teleport</div>
     <div class="menu-item" data-id="settings">Settings</div>
     <div class="menu-item" data-id="close">Close Menu</div>
-    <div class="footer">↑ ↓ = Navigate • Enter = Select</div>
+    <div class="footer">↑ ↓ = Navigate • Enter = Select • Backspace = Back</div>
   </div>
 
   <script>
@@ -77,14 +80,13 @@
     let index = 0;
 
     function updateSelection() {
-      items.forEach((el, i) => {
-        el.classList.toggle("selected", i === index);
-      });
+      items.forEach((el, i) => el.classList.toggle("selected", i === index));
     }
 
     window.addEventListener("message", (ev) => {
       const d = ev.data;
       if (!d || !d.action) return;
+
       if (d.action === "up") {
         index = (index - 1 + items.length) % items.length;
         updateSelection();
@@ -98,10 +100,19 @@
           method: "POST",
           body: JSON.stringify({ id }),
         });
+      } else if (d.action === "back") {
+        const closeItem = items.find(i => i.dataset.id === "close");
+        if (closeItem) {
+          const id = closeItem.dataset.id;
+          fetch(`https://fluxus_menu/action`, {
+            method: "POST",
+            body: JSON.stringify({ id }),
+          });
+        }
       }
     });
 
-    // initial highlight
+    // Initial highlight
     updateSelection();
   </script>
 </body>
